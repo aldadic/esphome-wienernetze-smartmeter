@@ -50,11 +50,11 @@ namespace esphome {
                 return;
             }
 
-            if(memcmp(&msg[16], "SMSfp", 5)!=0){
-                ESP_LOGW(TAG, "Unknown smartmeter model, support is untested.");
-                ESP_LOGW(TAG, "Please open a GitHub issue:");
-                ESP_LOGW(TAG, "https://github.com/bernikr/esphome-wienernetze-im150-smartmeter/issues/new");
-            }
+            // if(memcmp(&msg[16], "SMSfp", 5)!=0){
+            //     ESP_LOGW(TAG, "Unknown smartmeter model, support is untested.");
+            //     ESP_LOGW(TAG, "Please open a GitHub issue:");
+            //     ESP_LOGW(TAG, "https://github.com/bernikr/esphome-wienernetze-im150-smartmeter/issues/new");
+            // }
 
             // CRC Check
             int crc = this->CRC16.x25(msg.data() + 1, datalen-4);
@@ -65,12 +65,13 @@ namespace esphome {
             }
             
             // Decrypt
-            uint8_t msglen = datalen - 33;
+            uint8_t headerlen = 14; // 16 for Siemens, 14 for Landis+Gyr
+            uint8_t msglen = datalen - headerlen - 17;
             uint8_t message[msglen] = {0};
-            memcpy(message, msg.data() + 30, msglen);
+            memcpy(message, msg.data() + headerlen + 14, msglen);
             uint8_t nonce[16] = {0};
-            memcpy(nonce, msg.data() + 16, 8);
-            memcpy(nonce + 8, msg.data() + 26, 4);
+            memcpy(nonce, msg.data() + headerlen, 8);
+            memcpy(nonce + 8, msg.data() + headerlen + 10, 4);
             nonce[15] = 0x02;
             this->ctraes128.setKey(this->key, 16);
             this->ctraes128.setIV(nonce, 16);

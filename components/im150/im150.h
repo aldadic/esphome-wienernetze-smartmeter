@@ -48,7 +48,7 @@ namespace esphome {
             private:
                 std::vector<uint8_t> receiveBuffer; // Stores the packet currently being received
                 unsigned long lastRead = 0; // Timestamp when data was last read
-                int readTimeout = 100; // Time to wait after last byte before considering data complete
+                int readTimeout = 200; // Time to wait after last byte before considering data complete
 
                 FastCRC16 CRC16;
                 CTR<AES128> ctraes128;
